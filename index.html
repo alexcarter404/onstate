@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      html,
+      body{
+        font-family: Arial, sans-serif;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map{
+                                bottom: 0px;
+                                height:100%;
+                                left: 362px;
+                                position: absolute;
+                                right: 0px;
+                        }
+                        .options-box{
+                                background: #fff;
+                                border: 1px solid #999;
+                                border-radius: 3px;
+                                height: 100%; 
+                                line-height: 35px;  
+                                padding: 10px 10px 30px 10px; 
+                                text-align: left; 
+                                width: 340px;
+                        }
+    </style>
+    <script type="text/javascript">
+        
+    $.post("phpsqlajax_genxml2.php", function(data){
+        var locations = jQuery.parseJSON(data);
+        var htmldata = "";
+
+        $.each(locations, function(i, serverData){
+            htmldata = htmldata + '- ' + serverData.name + ', ' + serverData.lat + ', ' + serverData.lng + '<br>';
+        });
+
+        $('showlistings').html(htmldata);
+    });
+        </script>
+  </head>
+  <body>
+  
+  <div class="container">
+    <div class="options-box">
+      <h1>See pre-populated locations</h1>
+      <div>
+        <input id="show-listings" type="button" value="Show Locations">
+        <input id="hide-listings" type="button" value="Hide Locations">
+      </div>
+
+  
+    </div>
+    <div id="map"></div>
+  </div>
+
+    <script>
+
+      var map;
+
+      //Global Marker
+      var markers = [];
+      function initMap() {
+                                //Maps css.
+                                var styles = [{featuresType:'administrative',
+                                                elementType: 'labels.text.stroke',
+                                                stylers:[{color: '#ffffff'},
+                                                {weight:6}]}]
+        // constructor creates a new map - only center and zoom required.
+        map = new google.maps.Map(document.getElementById('map'),{
+          center: {lat:53.8074, lng:-3.000000},
+          zoom: 6,
+                            styles: styles,
+                            mapTypeControl: false
+        });
+   
+      var locations = [
+            {title: 'London', location: {lat:51.5074, lng:0.000000}},
+            {title: 'Edinburgh', location: {lat:55.9533, lng:-3.1883}},
+            {title: 'Cardiff', location: {lat:51.4816, lng:-3.1791}},
+            {title: 'Belfast', location: {lat:54.5973, lng:-5.9301}},
+            {title: 'Normanton', location: {lat:53.7009, lng:-1.4171}},
+            {title: 'Boston', location: {lat:52.9789, lng:0.0266}},
+            {title: 'Leeds', location: {lat:53.8008, lng:-1.5491}},
+            {title: 'Manchester', location: {lat:53.4808, lng:-2.2426}},
+            ];
+
+          var largeInfowindow = new google.maps.InfoWindow();
+
+                //Style marker
+
+
+          var bounds = new google.maps.LatLngBounds();
+          //the following uses the location array to create an array of markers
+          for (var i = 0; i < locations.length; i++) {
+            //Get the position from the location array.
+            var position = locations[i].location;
+            var title = locations[i].title;
+            //Create a marker per location, and put into marker array.
+            var marker = new google.maps.Marker({
+              //map: map,
+              position: position,
+              title: title,
+              animation: google.maps.Animation.DROP,
+              id: i
+            });
+            //Push the marker to our array of markers.
+            markers.push(marker);
+            //Extend boundaries of map for each marker
+            bounds.extend(marker.position);
+            // Create an onclick event to open an infowindow at each marker.
+            marker.addListener('click', function(){
+              populateInfoWindow(this, largeInfowindow);
+            });
+          }
+
+
+                document.getElementById('show-listings').addEventListener('click', showListings);
+          document.getElementById('hide-listings').addEventListener('click', hideListings);
+          
+
+          
+
+          //these below control what happens when infowindow is clicked.
+          function populateInfoWindow(marker, infowindow) {
+            //check to make sure infowindow is not already open for this marker.
+            if (infowindow.marker != marker) {
+              infowindow.marker = marker;
+              infowindow.setContent('<div>' + marker.title + '</div>');
+              infowindow.open(map, marker);
+              // Make sure the marker property is cleared if the infowindow is closed.
+              infowindow.addListener('closeclick', function(){
+                infowindow.setMarker(null);
+              });
+            }
+          }
+                function showListings() {
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(map);
+              bounds.extend(markers[i].position);
+            }
+                        map.fitBounds(bounds);
+
+          }
+          function hideListings() {
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(null);
+            }
+          }
+          
+      }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD3iTjDj01yQi53g8ypjYh8h5Qi2IkHmPM&v=3&callback=initMap">
+    </script>
+
+
+
+  </body>
+</html>
+
+
+  
