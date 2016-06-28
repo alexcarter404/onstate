@@ -16,9 +16,9 @@ $result = mysqli_query($conn, $sql);
 
 $markers = array();
 
-        while ($row = @mysql_fetch_assoc($result)){
+        while ($row = mysqli_fetch_assoc($result)){
             extract($row);
-            $markers[] = "<marker name='".xml_entities($name)."' address='".xml_entities($address)."' lat='{$lat}' lng='{$lng}' type='{$type}' />";
+            $markers[] = "<marker name='".xml_entities($row['name'])."' address='".xml_entities($row['address'])."' lat='".xml_entities($row['lat'])."' lng='".xml_entities($row['lng'])."' type='".xml_entities($row['type'])."' />";
         }
 
         if(count($markers)){
